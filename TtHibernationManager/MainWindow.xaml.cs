@@ -40,14 +40,28 @@ namespace TtHibernationManager
             await Task.Delay(1);
 
 
-            var p0 = Process.GetProcessesByName("AP")[0];
-            p0.Kill();
+            var p0 = Process.GetProcessesByName("AP").FirstOrDefault();
+            p0?.Kill();
 
             var p = Process.GetProcessesByName("Hid")[0].Id;
             SuspendProcess(p);
 
             // Hibernate
-            System.Windows.Forms.Application.SetSuspendState(PowerState.Hibernate, true, true);
+            // System.Windows.Forms.Application.SetSuspendState(PowerState.Hibernate, true, true);
+            //Process.Start(@"C:\Windows\System32\shutdown.exe /h");
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = false;
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.FileName = "shutdown.exe";
+            startInfo.Arguments = "/h ";
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            Process shutdown = Process.Start(startInfo);
+            string outstring = shutdown.StandardOutput.ReadToEnd();
+            string errstring = shutdown.StandardError.ReadToEnd();
+            shutdown.WaitForExit();
         }
 
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
